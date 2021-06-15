@@ -123,6 +123,13 @@ def send_data_to_backend(water_information: WATER_INFORMATION) -> Tuple[
 
 
 def main() -> Tuple[bool, str]:
+    if not UUID:
+        root_logger.error("TOWN_UUID not defined in environment")
+        return False, "UUID not defined"
+    elif not API_KEY:
+        root_logger.error("API_KEY not defined in environment")
+        return False, "API_KEY not defined"
+
     logger = create_logger(inspect.currentframe().f_code.co_name)
     content, success = get_website()
     if not success:
@@ -155,15 +162,10 @@ def main() -> Tuple[bool, str]:
 
 root_logger = create_logger("__main__")
 
-if not UUID:
-    root_logger.error("TOWN_UUID not defined in environment")
-elif not API_KEY:
-    root_logger.error("API_KEY not defined in environment")
-else:
-    success, message = main()
-    if not success:
-        root_logger.error(f"Something went wrong ({message})")
-        token = os.getenv("TOKEN")
-        chatlist = os.getenv("TELEGRAM_CHATLIST") or "139656428"
-        send_telegram_alert(message, token=token, chatlist=chatlist.split(","))
-        sys.exit(1)
+success, message = main()
+if not success:
+    root_logger.error(f"Something went wrong ({message})")
+    token = os.getenv("TOKEN")
+    chatlist = os.getenv("TELEGRAM_CHATLIST") or "139656428"
+    send_telegram_alert(message, token=token, chatlist=chatlist.split(","))
+    sys.exit(1)
